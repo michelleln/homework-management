@@ -1,6 +1,6 @@
 import datetime
 
-from backend.database import DB
+from databases import DB
 from flask import jsonify, abort
 
 
@@ -18,7 +18,7 @@ class Task(object):
         abort(404)
 
     def delete(self, id):
-        # if the task requested for deletion found then reemove it from database
+        # if the task requested for deletion is found then reemove it from database
         task = DB.find_one("Tasks", {"_id": id})
         if task:
             DB.remove("Tasks", {"_id": id})

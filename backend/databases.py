@@ -11,8 +11,24 @@ class DB(object):
     def init():
         client = MongoClient(DB.uri)
         DB.DATABASE = client['collection']
-        try:
-            client.admin.command('ping')
-            print("Pinged your deployment. You successfully connected to MongoDB!")
-        except Exception as e:
-            print(e)
+
+    @staticmethod
+    def insert(collection, data):
+        DB.DATABASE[collection].insert(data)
+
+    @staticmethod
+    def find_one(collection, query):
+        return DB.DATABASE[collection].find_one(query)
+
+    @staticmethod
+    def find(collection, query):
+        return DB.DATABASE[collection].find(query)
+
+    # need delete and update methods
+    @staticmethod
+    def remove(collection, query):
+        DB.DATABASE[collection].remove(query)
+
+    @staticmethod
+    def update(collection, query, update, option=False):
+        DB.DATABASE[collection].update(query, update, option)

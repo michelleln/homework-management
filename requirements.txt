@@ -1,3 +1,6 @@
-Flask
-Flask-Session
+flask
+flask-Session
 requests
+pymongo
+flask-cors
+dnspython

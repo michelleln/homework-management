@@ -1,4 +1,4 @@
-from backend.databases import DB
+from databases import DB
 
 
 class Course(object):
@@ -12,5 +12,13 @@ class Course(object):
     def insert(self):
         # if the course isn't already there in the database then add it
         if not DB.find_one("Courses", {"_id": self._id}):
-            # jsonify the input python object so it's appropriate data type to be added to database
+            # decompose the input python object so it's appropriate data type to be added to database
             DB.insert(collection='Courses', data=self.json())
+
+    def json(self):
+        return {
+            "_id": self._id,
+            "name": self.name,
+            "instructor": self.instructor,
+            "students": self.students
+        }

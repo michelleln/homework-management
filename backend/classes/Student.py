@@ -1,6 +1,6 @@
 import datetime
 
-from backend.databases import DB
+from databases import DB
 from flask import jsonify, abort
 
 
