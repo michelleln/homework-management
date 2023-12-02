@@ -1,12 +1,12 @@
 import os
-
+from flask import Flask
 from flask import jsonify, abort, request, make_response, Blueprint
-from helpers import CourseHelper, StudentHelper, TaskHelper
-from databases import DB
+from backend.helpers import CourseHelper, StudentHelper, TaskHelper
+from backend.databases import DB
+from flask_cors import CORS
 import datetime
 import requests
 import json
-import base64
 
 # Configure application
 bp = Blueprint('main', __name__)
@@ -14,6 +14,7 @@ bp = Blueprint('main', __name__)
 
 def create_app(config):
     app = Flask(__name__)
+    CORS(app)
     DB.init()
     register_blueprints(app)
     return app

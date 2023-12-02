@@ -1,4 +1,4 @@
-from classes.Student import Student
+from backend.classes.Student import Student
 import uuid
 import datetime
 import pytz

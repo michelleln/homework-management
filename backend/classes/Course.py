@@ -1,4 +1,4 @@
-from databases import DB
+from backend.databases import DB
 
 
 class Course(object):

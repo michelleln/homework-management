@@ -1,4 +1,4 @@
-from classes.Task import Task
+from backend.classes.Task import Task
 from flask import jsonify
 import uuid
 import datetime

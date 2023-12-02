@@ -1,4 +1,4 @@
-from classes.Course import Course
+from backend.classes.Course import Course
 import uuid
 
 

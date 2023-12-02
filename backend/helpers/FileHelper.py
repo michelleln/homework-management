@@ -1,4 +1,4 @@
-from classes.File import File
+from backend.classes.File import File
 
 file_handler = File()
 
