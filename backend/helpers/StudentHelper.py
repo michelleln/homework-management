@@ -5,11 +5,9 @@ import pytz
 
 student = Student()
 
-
-def post(first_name, last_name, image, email, _id, courses):
-    profile = {"first_name": first_name, 'last_name': last_name, '_id': _id, "image": image,
-               "email": email, "courses": courses, "created": datetime.datetime.now()}
-    profile["last_sync_date"] = profile["created"]
+def post(first_name, last_name, email, _id):
+    profile = {"firstName": first_name, 'lastName': last_name, '_id': _id, "email": email, "created": datetime.datetime.now()}
+    #profile["last_sync_date"] = profile["created"]
     student.insert(profile)
 
 

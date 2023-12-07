@@ -1,16 +1,18 @@
 import datetime
-
 from backend.databases import DB
-from flask import jsonify, abort
+from flask import jsonify
 
 
-class Student(object):
+class Student:
     def insert(self, profile):
         # profile is a dictionary containing details of the student to be added to database
-        DB.insert(collection="Students", data=profile)
+        DB.insert(collection="students", data=profile)
 
-    def get(self, _id):
-        student = DB.find_one("Students", {"_id": _id})
-        if student:
-            return jsonify(student)
-        abort(404)
+    def get(self, id):
+        students = DB.find("students", {"_id": id})
+        result = []
+        if students:
+            for student in students:
+                result.append(student)
+                return jsonify(result[0])
+        return jsonify({"error": "Student not found"}), 404

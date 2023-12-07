@@ -1,70 +1,133 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { clearSession } from "./SessionService";
+import { getUserFromSession } from "./SessionService";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
-    const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
-  
-    const toggleProfileDropdown = () => {
-      setProfileDropdownOpen(!profileDropdownOpen);
-    };
-  
-    return (
-      <div className="desktop-friendly">
-        <header className="bg-white shadow">
-          <div className="flex justify-between items-center px-10 py-6">
-            <h1 className="text-3xl font-bold">TDSB App</h1>
-            
-            <nav>
-              <ul className="flex gap-8">
-                <li><a href="#" className="hover:underline">Home</a></li>
-                <li><a href="#" className="hover:underline">Courses</a></li>
-                <li><a href="#" className="hover:underline">Tasks</a></li>
-                <li><a href="#" className="hover:underline">Tools</a></li>
-              </ul>
-            </nav>
-  
-            <div className="relative">
-              <button onClick={toggleProfileDropdown} className="rounded-full focus:outline-none focus:ring">
-                <img className="h-10 w-10 rounded-full" src="/avatar.jpg" alt="Profile" />
-              </button>
-              {profileDropdownOpen && (
-                <div className="absolute right-0 w-48 py-2 mt-2 bg-white rounded-md shadow-lg">
-                  <a href="#" className="block px-4 py-2 text-sm">Logout</a>
-                  <a href="#" className="block px-4 py-2 text-sm">Account Settings</a>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-  
-        <main className="py-10">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white shadow rounded-lg p-6">
-              <div className="border-b pb-4">
-                <h2 className="text-2xl font-semibold">Account Settings</h2>
-              </div>
-              <div className="divide-y">
-                <div className="py-4 flex justify-between">
-                  <span className="text-gray-600">Name:</span>
-                  <span className="font-medium">John Doe</span>
-                </div>
-                <div className="py-4 flex justify-between">
-                  <span className="text-gray-600">Username:</span>
-                  <span className="font-medium">@johndoe</span>
-                </div>
-                <div className="py-4 flex justify-between">
-                  <span className="text-gray-600">Language:</span>
-                  <span className="font-medium">English</span>
-                </div>
-                <div className="py-4 flex justify-between">
-                  <span className="text-gray-600">Timezone:</span>
-                  <span className="font-medium">GMT-5 Eastern Time (US & Canada)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
+  const [studentDetails, setStudentDetails] = useState({});
+  const [courses, setCourses] = React.useState([]);
+  const apiUrl = "http://127.0.0.1:5000";
+  const toggleProfileDropdown = () => {
+    setProfileDropdownOpen(!profileDropdownOpen);
+  };
+  const navigate = useNavigate();
 
-  export default Profile;
+  const handleLogout = () => {
+    // Clear local storage and navigate to the logout route
+    clearSession();
+    alert("Logged out succesfully");
+    navigate("/login");
+  };
+
+  const storedUser = getUserFromSession();
+
+  useEffect(() => {
+    const fetchStudentDetails = async () => {
+      try {
+        const response = await axios.get(
+          `${apiUrl}/api/students?id=${storedUser.id}`,
+          { withCredentials: true }
+        );
+        setStudentDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching student details:", error);
+      }
+    };
+
+    fetchStudentDetails();
+  }, [storedUser.id]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response1 = await axios.get(
+          `${apiUrl}/api/tasks/course?student_id=${storedUser.id}`
+        );
+        setCourses(response1.data);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, [storedUser.id]);
+  console.log(courses);
+  return (
+    <div className="desktop-friendly">
+      <header className="bg-white shadow">
+        <div className="flex justify-between items-center px-10 py-6">
+          <h1 className="text-3xl font-bold">Homework Management</h1>
+
+          <nav>
+            <ul className="flex gap-8">
+              <li>
+                <a href="/calendar" className="hover:underline">
+                  Calendar
+                </a>
+              </li>
+              <li>
+                <a href="/addtask" className="hover:underline">
+                  New Task
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          <div className="relative">
+            <button
+              onClick={toggleProfileDropdown}
+              className="rounded-full focus:outline-none focus:ring"
+            >
+              <img
+                className="h-10 w-10 rounded-full"
+                src="/avatar.jpg"
+                alt="Profile"
+              />
+            </button>
+            {profileDropdownOpen && (
+              <div className="absolute right-0 w-48 py-2 mt-2 bg-white rounded-md shadow-lg">
+                <button onClick={handleLogout}>Logout</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="py-10">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="border-b pb-4">
+              <h2 className="text-2xl font-semibold">Account Settings</h2>
+            </div>
+            <div className="divide-y">
+              <div className="py-4 flex justify-between">
+                <span className="text-gray-600">First name:</span>
+                <span className="font-medium">{studentDetails.firstName}</span>
+              </div>
+              <div className="py-4 flex justify-between">
+                <span className="text-gray-600">Last name:</span>
+                <span className="font-medium">{studentDetails.lastName}</span>
+              </div>
+              <div className="py-4 flex justify-between">
+                <span className="text-gray-600">Email:</span>
+                <span className="font-medium">{studentDetails.email}</span>
+              </div>
+              <div className="py-4 flex justify-between">
+                <span className="text-gray-600">ID:</span>
+                <span className="font-medium">{studentDetails._id}</span>
+              </div>
+              <div className="py-4 flex justify-between">
+                <span className="text-gray-600">Courses:</span>
+                <span className="font-medium">{courses.join(", ")}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default Profile;

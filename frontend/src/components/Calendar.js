@@ -1,68 +1,188 @@
-import React from 'react';
+import React from "react";
+import axios from "axios";
+import { clearSession } from "./SessionService";
+import { useUser } from "./UserContext";
+import { getUserFromSession } from "./SessionService";
+import { useNavigate } from "react-router-dom";
 
 function Calendar() {
-    const [showProfileMenu, setShowProfileMenu] = React.useState(false);
-  
-    const toggleProfileMenu = () => {
-      setShowProfileMenu(!showProfileMenu);
-    };
-  
-    return (
-      <div className="container mx-auto">
-        {/* Screen Header */}
-        <header className="flex justify-between items-center p-4 bg-gray-200">
-          <h1 className="text-2xl font-bold">TDSB App</h1>
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = React.useState(new Date());
+  const [tasks, setTasks] = React.useState([]);
+  const { user } = useUser();
+  const { login } = useUser();
+  //const { logout } = useUser();
+  const navigate = useNavigate();
+
+  const [showProfileOptions, setShowProfileOptions] = React.useState(false);
+  const toggleProfileOptions = () => setShowProfileOptions((prev) => !prev);
+
+  const handleLogout = () => {
+    // Clear local storage and navigate to the login route
+    clearSession();
+    //logout();
+    alert("Logged out succesfully");
+    navigate("/login");
+  };
+
+  const fetchTasks = async (taskYear, taskMonth, student) => {
+    // Fetch tasks based on year and month
+    const apiUrl = "http://127.0.0.1:5000";
+
+    try {
+      const response = await axios.get(
+        `${apiUrl}/api/tasks/deadline?student=${student}&year=${taskYear}&month=${
+          taskMonth + 1
+        }`,
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        console.log("yayyy");
+        const tasksArray = response.data;
+
+        return tasksArray; /*Array.isArray(tasksArray)
+          ?*/ /*.filter(
+              (task) => new Date(task.deadline).getMonth() === taskMonth
+            )*/
+        //: [];
+      } else {
+        console.error("Failed to fetch tasks:", response.statusText);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      return [];
+    }
+  };
+
+  React.useEffect(() => {
+    const storedUser = getUserFromSession();
+
+    if (storedUser) {
+      // Update user context if user is found in local storage
+      login(storedUser.id);
+    }
+    fetchTasks(currentMonth.getFullYear(), currentMonth.getMonth(), user).then(
+      (fetchedTasks) => {
+        setTasks(fetchedTasks);
+      }
+    );
+  }, [currentMonth, user, login]);
+
+  const changeMonth = (increment) => {
+    setCurrentMonth(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + increment, 1)
+    );
+  };
+
+  const renderCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const startDay = new Date(year, month, 1).getDay();
+    const numDays = new Date(year, month + 1, 0).getDate();
+    //console.log(user);
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    let days = [];
+
+    // Add day names
+    dayNames.forEach((day) => {
+      days.push(
+        <div key={`day-${day}`} className="font-bold p-4 text-center">
+          {day}
+        </div>
+      );
+    });
+    // Add empty cells for days before the start of the month
+    for (let i = 0; i < startDay; i++) {
+      days.push(<div key={`empty-${i}`} className="border p-4"></div>);
+    }
+
+    // Add calendar cells for each day
+    for (let i = 1; i <= numDays; i++) {
+      const date = new Date(year, month, i);
+      const isToday = today.toDateString() === date.toDateString();
+      days.push(
+        <div key={i} className={`border p-4 ${isToday ? "bg-blue-100" : ""}`}>
+          <span className="block text-center font-bold">{i}</span>
+          <ul className="mt-2">
+            {Array.isArray(tasks) &&
+              tasks
+                .filter((task) => new Date(task.deadline).getDate() === i)
+                .map((task, idx) => (
+                  <li key={idx} className="text-xs truncate">
+                    {task.title}
+                    <div>
+                      <strong>Course:</strong> {task.course_id}
+                    </div>
+                    <div>{task.deadline}</div>
+                    <div>{task.description}</div>
+                  </li>
+                ))}
+          </ul>
+        </div>
+      );
+    }
+
+    return days;
+  };
+
+  return (
+    <div>
+      <header className="bg-gray-900 text-white p-4">
+        <div className="flex justify-between items-center container mx-auto">
+          <h1 className="text-2xl">Homework Management</h1>
+          <nav>
+            <ul className="flex space-x-8">
+              <li>
+                <a href="./addtask" className="hover:underline">
+                  New Task
+                </a>
+              </li>
+            </ul>
+          </nav>
           <div className="relative">
-            <button onClick={toggleProfileMenu} className="text-base p-2 bg-blue-600 text-white rounded-md">
+            <button
+              className="hover:bg-gray-700 p-2 rounded"
+              onClick={toggleProfileOptions}
+            >
               Profile
             </button>
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20">
-                <a href="/" className="block px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Logout</a>
-                <a href="/" className="block px-4 py-2 text-gray-800 hover:bg-blue-500 hover:text-white">Account Settings</a>
+            {showProfileOptions && (
+              <div className="absolute right-0 mt-2 bg-white text-black py-2 rounded shadow-xl">
+                <ul>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <button onClick={handleLogout}>Logout</button>
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <a href="/profile">Account Settings</a>
+                  </li>
+                </ul>
               </div>
             )}
           </div>
-        </header>
-  
-        {/* Navigation Bar */}
-        <nav className="bg-gray-300 p-4">
-          <ul className="flex space-x-4">
-            <li><a href="/" className="text-blue-600 hover:text-blue-700">Home</a></li>
-            <li><a href="/" className="text-blue-600 hover:text-blue-700">Courses</a></li>
-            <li><a href="/" className="text-blue-600 hover:text-blue-700">Tasks</a></li>
-            <li><a href="/" className="text-blue-600 hover:text-blue-700">Tools</a></li>
-          </ul>
-        </nav>
-  
-        {/* Calendar Section */}
-        <div className="p-4">
-          <div className="bg-white border rounded-lg shadow">
-            {/* Calendar Plugin Placeholder */}
-            <div className="p-5">
-              <div className="text-lg font-bold">
-                {/* Current Month and Year */}
-                { new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) }
-              </div>
-              {/* Calendar Plugin can be inserted Below */}
-              <div id="calendar-plugin" className="mt-3">
-                {/* Dummy Calendar - Replace with actual plugin */}
-                <div className="grid grid-cols-7 gap-2 text-center p-2">
-                  {/* Column Headers (Sunday to Saturday) */}
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="font-medium">{day}</div>
-                  ))}
-                  {/* Days (Placeholder for the actual dates - should be dynamically generated) */}
-                  {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
-                    <div key={day} className="p-2 mb-1 bg-gray-100 rounded-full">{day}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-    );
-  }
+      </header>
 
-  export default Calendar;
+      <div className="mt-8 px-6">
+        <div className="flex justify-between items-center mb-4">
+          <button onClick={() => changeMonth(-1)} className="px-4 py-2">
+            Previous
+          </button>
+          <h2 className="text-xl font-semibold">
+            {currentMonth.toLocaleString("default", { month: "long" })}{" "}
+            {currentMonth.getFullYear()}
+          </h2>
+          <button onClick={() => changeMonth(1)} className="px-4 py-2">
+            Next
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-4">{renderCalendarDays()}</div>
+      </div>
+    </div>
+  );
+}
+
+export default Calendar;

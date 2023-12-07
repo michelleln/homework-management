@@ -1,6 +1,9 @@
 Flask
 flask
-flask-Session
+Flask-Session
 requests
 pymongo
 flask-cors
+axios
+pytz
+Flask_Bcrypt

@@ -1,34 +1,28 @@
 import pymongo
-from pymongo.mongo_client import MongoClient
+from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
-
-class DB(object):
-
-    uri = "mongodb+srv://lehnhung28:ZinGfix3mV8Liw6x@cluster0.k06gnyf.mongodb.net/?retryWrites=true&w=majority"
-
-    @staticmethod
+class DB:
     def init():
-        client = MongoClient(DB.uri)
-        DB.DATABASE = client['collection']
+        DB.URI = "mongodb+srv://lehnhung28:TsKJMYVNwJDZkZeW@cluster0.k06gnyf.mongodb.net/?retryWrites=true&w=majority"
+        DB.client = MongoClient(DB.URI)
+        DB.DATABASE = DB.client["collections"]
 
-    @staticmethod
     def insert(collection, data):
-        DB.DATABASE[collection].insert(data)
+        DB.DATABASE[collection].insert_one(data)
 
-    @staticmethod
     def find_one(collection, query):
         return DB.DATABASE[collection].find_one(query)
 
-    @staticmethod
     def find(collection, query):
         return DB.DATABASE[collection].find(query)
 
+    def find_distinct(collection, attribute, query):
+        return DB.DATABASE[collection].distinct(attribute, query)
+    
     # need delete and update methods
-    @staticmethod
     def remove(collection, query):
-        DB.DATABASE[collection].remove(query)
+        DB.DATABASE[collection].delete_one(query)
 
-    @staticmethod
-    def update(collection, query, update, option=False):
-        DB.DATABASE[collection].update(query, update, option)
+    def update(collection, query, update, upsert=False):
+        DB.DATABASE[collection].update(query, update, upsert)
