@@ -5,19 +5,26 @@ import { useUser } from "./UserContext";
 import { saveUserToSession } from "./SessionService";
 
 function LogIn() {
+  // State variables to manage email and password input fields
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  // Access the login function from the UserContext
   const { login } = useUser();
 
+  // Access the navigate function from react-router-dom
   const navigate = useNavigate();
 
+  // Function to log in the user
   const logInUser = async () => {
+    // Validate if email and password are not blank
     if (email.length === 0 || password.length === 0) {
       alert("Email and password cannot be blank!");
       return;
     }
 
     try {
+      // Send a POST request to the server to log in
       const response = await axios.post(
         "http://127.0.0.1:5000/login",
         {
@@ -26,12 +33,15 @@ function LogIn() {
         },
         { withCredentials: true }
       );
-      console.log(response);
+
+      // Log in the user, save user data to session, and navigate to the calendar
       login(response.data);
       saveUserToSession(response.data);
       navigate("/calendar");
     } catch (error) {
       console.error(error);
+
+      // Handle authentication errors
       if (error.response && error.response.status === 401) {
         alert("Invalid credentials");
       }
@@ -45,6 +55,7 @@ function LogIn() {
           Homework Management
         </h2>
         <form className="mt-8 space-y-6">
+          {/* Email input field */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
@@ -61,6 +72,7 @@ function LogIn() {
               required
             />
           </div>
+          {/* Password input field */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
@@ -77,6 +89,7 @@ function LogIn() {
               required
             />
           </div>
+          {/* Register link */}
           <div className="flex items-center justify-between">
             <div className="text-sm"></div>
             <div className="text-sm">
@@ -88,6 +101,7 @@ function LogIn() {
               </a>
             </div>
           </div>
+          {/* Log in button */}
           <div>
             <button
               type="submit"

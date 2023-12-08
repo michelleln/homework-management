@@ -3,29 +3,35 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
+  // State variables for user registration
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
 
+  // Access the navigate function from react-router-dom
   const navigate = useNavigate();
 
+  // Function to register a new user
   const registerUser = async () => {
+    // Check if email and password are provided
     if (email.length === 0 || password.length === 0) {
       alert("Email and password cannot be blank!");
       return;
     }
 
     try {
+      // Send a registration request to the server
       const response = await axios.post("http://127.0.0.1:5000/signup", {
         email: email,
         password: password,
       });
-      console.log(response);
+
+      // Check if the registration was successful
       if (response.status === 200) {
         const user = response.data;
 
-        // Add student to API database
+        // Add student to the API database
         const responseStudent = await axios.post(
           "http://127.0.0.1:5000/api/students",
           {
@@ -59,10 +65,11 @@ function Register() {
           Homework Management
         </h2>
         <form className="mt-8 space-y-6">
+          {/* Input fields for user registration */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
-              htmlFor="email"
+              htmlFor="firstName"
             >
               First name
             </label>
@@ -78,7 +85,7 @@ function Register() {
           <div>
             <label
               className="block text-sm font-medium text-gray-700"
-              htmlFor="email"
+              htmlFor="lastName"
             >
               Last name
             </label>
@@ -126,6 +133,7 @@ function Register() {
           <div className="flex items-center justify-between">
             <div className="text-sm"></div>
             <div className="text-sm">
+              {/* Link to the login page */}
               <a
                 href="/login"
                 className="bg-red-500 hover:bg-red-700 text-white font-medium py-2 px-4 rounded"
@@ -134,6 +142,7 @@ function Register() {
               </a>
             </div>
           </div>
+          {/* Button to submit the registration form */}
           <div>
             <button
               type="submit"

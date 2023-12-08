@@ -5,24 +5,32 @@ import { getUserFromSession } from "./SessionService";
 import { useNavigate } from "react-router-dom";
 
 function Profile() {
+  // State variables for managing the profile dropdown and user details
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const [studentDetails, setStudentDetails] = useState({});
   const [courses, setCourses] = React.useState([]);
   const apiUrl = "http://127.0.0.1:5000";
+
+  // Function to toggle the profile dropdown
   const toggleProfileDropdown = () => {
     setProfileDropdownOpen(!profileDropdownOpen);
   };
+
+  // Access the navigate function from react-router-dom
   const navigate = useNavigate();
 
+  // Function to handle user logout
   const handleLogout = () => {
     // Clear local storage and navigate to the logout route
     clearSession();
-    alert("Logged out succesfully");
+    alert("Logged out successfully");
     navigate("/login");
   };
 
+  // Get stored user information from the session
   const storedUser = getUserFromSession();
 
+  // Fetch student details when the component mounts or when storedUser.id changes
   useEffect(() => {
     const fetchStudentDetails = async () => {
       try {
@@ -39,6 +47,7 @@ function Profile() {
     fetchStudentDetails();
   }, [storedUser.id]);
 
+  // Fetch courses when the component mounts or when storedUser.id changes
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -53,7 +62,7 @@ function Profile() {
 
     fetchCourses();
   }, [storedUser.id]);
-  console.log(courses);
+
   return (
     <div className="desktop-friendly">
       <header className="bg-white shadow">
@@ -102,6 +111,7 @@ function Profile() {
               <h2 className="text-2xl font-semibold">Account Settings</h2>
             </div>
             <div className="divide-y">
+              {/* Display user details */}
               <div className="py-4 flex justify-between">
                 <span className="text-gray-600">First name:</span>
                 <span className="font-medium">{studentDetails.firstName}</span>
@@ -118,6 +128,7 @@ function Profile() {
                 <span className="text-gray-600">ID:</span>
                 <span className="font-medium">{studentDetails._id}</span>
               </div>
+              {/* Display courses */}
               <div className="py-4 flex justify-between">
                 <span className="text-gray-600">Courses:</span>
                 <span className="font-medium">{courses.join(", ")}</span>
